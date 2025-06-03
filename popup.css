@@ -1,0 +1,86 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #ffffff;
+  width: 300px;
+  height: 400px;
+}
+
+.popup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.logo-container {
+  margin-bottom: 20px;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.usage-section {
+  width: 90%;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.usage-section h3 {
+  margin-bottom: 10px;
+  color: #3366cc;
+}
+
+.progress-container {
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  height: 12px;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 8px 0 0 8px;
+  transition: width 0.3s ease-in-out;
+}
+
+.limit-label {
+  font-size: 13px;
+  color: #444;
+}
+
+.uses-title-value{
+    display: flex ;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expire {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 25px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.expire h2 {
+  margin: 0;
+  font-size: 16px;
+  color: #856404;
+}
+
+.expire p {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #856404;
+}
