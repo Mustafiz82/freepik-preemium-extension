@@ -33,11 +33,11 @@ chrome.storage.local.get("userId", (result) => {
     });
 });
 
-// ✅ Monitor buttons (Download & Generate)
+// ✅ Monitor download buttons
 function monitorDownloadButtons() {
   const buttons = getFilteredDownloadButtons();
   buttons.forEach((btn) => addDownloadListener(btn));
-  observeForButtons(); // one observer for both types
+  observeForButtons(); // Also handles generate buttons
 }
 
 function getFilteredDownloadButtons() {
@@ -65,14 +65,14 @@ function addDownloadListener(button) {
   }
 }
 
-// ✅ Unified observer for download + generate buttons
+// ✅ Observe DOM for dynamically added buttons
 function observeForButtons() {
   const observer = new MutationObserver(() => {
-    // Handle download buttons
+    // Download buttons
     const downloadButtons = getFilteredDownloadButtons();
     downloadButtons.forEach((btn) => addDownloadListener(btn));
 
-    // Handle generate buttons
+    // Generate buttons (for AI credit use)
     const generateButtons = document.querySelectorAll('[data-cy="generate-button"]');
     generateButtons.forEach((button) => {
       if (!button.dataset.listenerAdded) {
@@ -109,12 +109,49 @@ function observeForButtons() {
             } else {
               console.warn("⚠️ Could not detect credit value.");
             }
-          }, 500); // Wait for UI to update
+          }, 500); // Allow DOM to fully render credit amount
         });
 
         button.dataset.listenerAdded = "true";
       }
     });
+
+    // ✅ Handle Upscale Button specifically
+    const upscaleButtons = document.querySelectorAll('button[data-cy="generate-button"]');
+    const creditElement = document.querySelector('span[uses-left-translation-key="common.creditsCostt"] span');
+
+    upscaleButtons.forEach((btn) => {
+      const label = btn.querySelector("span")?.textContent.trim().toLowerCase();
+      if (label === "upscale" && !btn.dataset.upscaleListenerAdded) {
+        btn.addEventListener("click", () => {
+          console.log("✅ Upscale button clicked (via extension):", btn);
+          const creditText = creditElement?.textContent.trim();
+          const creditValue = parseInt(creditText);
+
+          console.log("creditelement:", creditElement);
+          console.log("creditText:", creditText);
+          console.log("creditvalue:", creditValue);
+
+          chrome.storage.local.get("userId", (result) => {
+            const userId = result.userId;
+            if (!userId) return;
+
+            chrome.runtime.sendMessage({
+              type: "credit", 
+              creditValue: 72
+            }, (response) => {
+              if (response?.success) {
+                console.log("📤upscale  Credit logged to Google Sheet");
+              } else {
+                console.warn("⚠️ Failed to log credit");
+              }
+            });
+          });
+        });
+        btn.dataset.upscaleListenerAdded = "true";
+      }
+    });
+
   });
 
   observer.observe(document.body, {
@@ -123,5 +160,5 @@ function observeForButtons() {
   });
 }
 
-// ✅ Start monitoring buttons
+// ✅ Start script
 monitorDownloadButtons();
