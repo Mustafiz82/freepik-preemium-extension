@@ -25,8 +25,10 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-// Listen for download trigger
+// Listen for messages from content.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+  // ✅ Handle download logging
   if (message.type === "download") {
     chrome.storage.local.get("userId", (result) => {
       const userId = result.userId;
@@ -86,4 +88,37 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     return true; // Keep sendResponse alive
   }
+
+  // ✅ Handle credit usage logging
+  if (message.type === "credit") {
+    chrome.storage.local.get("userId", (result) => {
+      const userId = result.userId;
+      if (!userId) {
+        console.warn("⚠️ No user ID found in local storage for credit logging.");
+        sendResponse({ success: false });
+        return;
+      }
+
+      fetch(webAppURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userId,
+          creditsUsed: message.creditValue
+        })
+      })
+        .then(res => res.text())
+        .then(msg => {
+          console.log("📤 Credit logged:", msg);
+          sendResponse({ success: true });
+        })
+        .catch(err => {
+          console.error("❌ Error logging credits:", err);
+          sendResponse({ success: false });
+        });
+    });
+
+    return true; // Required to keep sendResponse alive asynchronously
+  }
+
 });
