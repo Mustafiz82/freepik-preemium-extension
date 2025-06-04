@@ -10,11 +10,16 @@ chrome.storage.local.get("userId", (result) => {
   fetch(`${webAppURL}?userId=${userId}`)
     .then(res => res.json())
     .then(data => {
-      const used = parseInt(data.downloadsUsedToday) || 0;
-      const limit = parseInt(data.downloadsPerDay) || 15;
+        const downloadUsed = parseInt(data.downloadsUsedToday) || 0;
+        const downloadLimit = parseInt(data.downloadsPerDay) || 1;
 
-      if (used >= limit) {
-        console.warn(`🚫 Limit exceeded: ${used}/${limit}. Removing cookies...`);
+        const creditUsed = parseInt(data.creditsUsed)
+        const creditLimit = parseInt(data.creditsPerMonth)
+
+      
+
+      if ((downloadUsed >= downloadLimit) || (creditUsed >= creditLimit) ) {
+        console.warn(`🚫 Limit exceeded: ${downloadUsed}/${downloadLimit}. Removing cookies...`);
 
         ["GR_REFRESH", "GR_TOKEN"].forEach(name => {
           chrome.runtime.sendMessage({ type: "removeCookie", cookieName: name }, (res) => {
@@ -23,7 +28,7 @@ chrome.storage.local.get("userId", (result) => {
         });
 
         const banner = document.createElement("div");
-        banner.innerText = "🚫 Download limit exceeded. Premium access disabled.";
+        banner.innerText = "🚫 Credit or download limit exceeded. Premium access disabled.";
         banner.style.cssText = "position:fixed;top:0;left:0;width:100%;z-index:9999;padding:10px;background:#c00;color:#fff;font-weight:bold;text-align:center";
         document.body.appendChild(banner);
       }

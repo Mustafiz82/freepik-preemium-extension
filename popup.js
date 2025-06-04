@@ -9,7 +9,7 @@ chrome.storage.local.get("userId", (result) => {
         .then(response => response.json())
         .then(data => {
             const downloadsUsed = data.downloadsUsedToday || 0;
-            const creditsUsed = 120;  // Optional, if you later want to validate credits
+            const creditsUsed = data.creditsUsed;  // Optional, if you later want to validate credits
             const downloadsLimit = data.downloadsPerDay;
             const creditsLimit = data.creditsPerMonth;
 
