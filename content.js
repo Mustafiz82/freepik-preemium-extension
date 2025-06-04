@@ -1,5 +1,36 @@
 console.log("🔍 Detected Freepik website");
 
+function removeLinkByText(linkText) {
+  const links = document.querySelectorAll("a");
+  for (const link of links) {
+    if (link.textContent.trim().includes(linkText)) {
+      console.log(`❌ Removed <a> tag with text: "${linkText}"`);
+      link.remove();
+      return true; // ✅ indicate removal success
+    }
+  }
+  return false; // Not found yet
+}
+
+
+let removed = removeLinkByText("AI Assistant");
+
+if (!removed) {
+  // Set up observer to monitor DOM changes
+  const observer = new MutationObserver(() => {
+    const removedNow = removeLinkByText("AI Assistant");
+    if (removedNow) {
+      observer.disconnect(); // Stop observing after removal
+      console.log("✅ Observer disconnected after removing AI Assistant");
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
+
 const webAppURL = "https://script.google.com/macros/s/AKfycbyDzwlWFxZ3AqM9gX4KhOVB_KCo8isl4Cv8vz259T9WPr_UzEAPUT6PnsPtyMkGkTN9sw/exec";
 
 // ✅ On Page Load → Check download limit
@@ -10,15 +41,15 @@ chrome.storage.local.get("userId", (result) => {
   fetch(`${webAppURL}?userId=${userId}`)
     .then(res => res.json())
     .then(data => {
-        const downloadUsed = parseInt(data.downloadsUsedToday) || 0;
-        const downloadLimit = parseInt(data.downloadsPerDay) || 1;
+      const downloadUsed = parseInt(data.downloadsUsedToday) || 0;
+      const downloadLimit = parseInt(data.downloadsPerDay) || 1;
 
-        const creditUsed = parseInt(data.creditsUsed)
-        const creditLimit = parseInt(data.creditsPerMonth)
+      const creditUsed = parseInt(data.creditsUsed)
+      const creditLimit = parseInt(data.creditsPerMonth)
 
-      
 
-      if ((downloadUsed >= downloadLimit) || (creditUsed >= creditLimit) ) {
+
+      if ((downloadUsed >= downloadLimit) || (creditUsed >= creditLimit)) {
         console.warn(`🚫 Limit exceeded: ${downloadUsed}/${downloadLimit}. Removing cookies...`);
 
         ["GR_REFRESH", "GR_TOKEN"].forEach(name => {
@@ -142,7 +173,7 @@ function observeForButtons() {
             if (!userId) return;
 
             chrome.runtime.sendMessage({
-              type: "credit", 
+              type: "credit",
               creditValue: 72
             }, (response) => {
               if (response?.success) {

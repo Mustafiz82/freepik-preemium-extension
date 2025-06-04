@@ -5,7 +5,13 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage", "scripting" , "cookies"],
+ "permissions": [
+  "storage",
+  "scripting",
+  "cookies",
+  "activeTab"
+]
+,
   "host_permissions": [
     "https://script.google.com/*",
     "https://www.freepik.com/*"
@@ -25,9 +31,11 @@
     "default_title": "Freepic Premium"
   },
   "content_scripts": [
-    {
-      "matches": ["https://www.freepik.com/*"],
-      "js": ["content.js"]
-    }
-  ]
+  {
+    "matches": ["https://www.freepik.com/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }
+]
+
 }
