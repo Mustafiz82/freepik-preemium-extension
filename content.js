@@ -15,29 +15,43 @@ function removeSidebarLink({ textIncludes = "", hrefIncludes = "" }) {
   }
   return false;
 }
-
 function setupMenuButtonWatcher(removalTargets = []) {
-  const menuBtn = document.querySelector('button[title="toggle menu"]');
-  if (!menuBtn) return setTimeout(() => setupMenuButtonWatcher(removalTargets), 500);
+  const buttons = [
+    document.querySelector('button[title="toggle menu"]'),
+    document.querySelector('button.menu-burger')
+  ].filter(Boolean); // Only keep non-null buttons
 
-  console.log("✅ Menu button found, adding click listener.");
-  menuBtn.addEventListener("click", () => {
-    console.log("👆 Menu button clicked");
-    setTimeout(() => {
-      for (const target of removalTargets) {
-        if (!removeSidebarLink(target)) {
-          const observer = new MutationObserver(() => {
-            if (removeSidebarLink(target)) {
-              observer.disconnect();
-              console.log(`✅ Observer removed target: ${target.textIncludes || target.hrefIncludes}`);
-            }
-          });
-          observer.observe(document.body, { childList: true, subtree: true });
+  if (buttons.length === 0) {
+
+    return setTimeout(() => setupMenuButtonWatcher(removalTargets), 500);
+  }
+
+  console.log(`✅ Found ${buttons.length} menu button(s), adding listeners.`);
+
+  buttons.forEach((btn, i) => {
+    if (btn.dataset.listenerAdded) return;
+
+    btn.addEventListener("click", () => {
+      console.log(`👆 Menu button ${i + 1} clicked`);
+      setTimeout(() => {
+        for (const target of removalTargets) {
+          if (!removeSidebarLink(target)) {
+            const observer = new MutationObserver(() => {
+              if (removeSidebarLink(target)) {
+                observer.disconnect();
+                console.log(`✅ Observer removed target: ${target.textIncludes || target.hrefIncludes}`);
+              }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+          }
         }
-      }
-    }, 300);
+      }, 300);
+    });
+
+    btn.dataset.listenerAdded = "true";
   });
 }
+
 
 setupMenuButtonWatcher([
   { textIncludes: "AI Assistant", hrefIncludes: "/pikaso/assistant" },
@@ -54,6 +68,71 @@ setupMenuButtonWatcher([
   { textIncludes: "Voiceovers", hrefIncludes: "audio/ai-voice-generator" },
   // { textIncludes: "All Tools", hrefIncludes: "/ai" }
 ]);
+
+
+// right option hiding and unhiding 
+
+function trimAccountDropdown() {
+  const upgrade = document.querySelector('a[data-cy="upgrade"]');
+  const subscription = document.querySelector('[data-cy="popover-user-my-subscription"]');
+  const account = document.querySelector('[data-cy="popover-account"]');
+  const containers = document.querySelectorAll("div.flex.flex-col.w-full.text-sm");
+
+  for (const el of containers) {
+    // Optional: refine further by checking child content
+    if (el.textContent.includes("Credit usage")) {
+      el.remove()
+      console.log("❌ Removed:  credit useds");
+    }
+  }
+
+  if (upgrade) {
+    upgrade.remove();
+    console.log("❌ Removed: Upgrade");
+  }
+
+  if (subscription) {
+    subscription.remove();
+    console.log("❌ Removed: Subscription");
+  }
+
+  if (account) {
+    account.remove();
+    console.log("❌ Removed: Account");
+  }
+}
+
+
+function setupAccountDropdownWatcher() {
+  console.log("form funciton ")
+  const accountBtn = document.querySelector('button[aria-controls="radix-:r1:"]')
+
+  if (!accountBtn) {
+    console.log("account button not foun")
+    return setTimeout(setupAccountDropdownWatcher, 500);
+  }
+
+  accountBtn.addEventListener("click", () => {
+    console.log("👤 Account button clicked");
+
+    // Observe and filter dropdown
+    const observer = new MutationObserver(() => {
+      trimAccountDropdown();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Fallback if dropdown appears instantly
+    setTimeout(trimAccountDropdown, 300);
+  });
+}
+
+setupAccountDropdownWatcher();
+
+
 
 // ✅ 3. Check Credit & Download Limit
 const webAppURL = "https://script.google.com/macros/s/.../exec";
