@@ -73,10 +73,24 @@ setupMenuButtonWatcher([
 // right option hiding and unhiding 
 
 function trimAccountDropdown() {
-  const upgrade = document.querySelector('a[data-cy="upgrade"]');
-  const subscription = document.querySelector('[data-cy="popover-user-my-subscription"]');
-  const account = document.querySelector('[data-cy="popover-account"]');
+  const upgrade = document.querySelector('a[data-cy="upgrade"], a[datacy="upgrade"]');
+  const upgradeBtn = Array.from(document.querySelectorAll('button')).find(
+    btn => btn.textContent.trim().toLowerCase() === "upgrade"
+  );
+  const language = document.querySelector('div[data-cy="language"], div[datacy="language"]');
+  const subscription = document.querySelector('[data-cy="popover-user-my-subscription"], [datacy="popover-user-my-subscription"]');
+  const account = document.querySelector('[data-cy="popover-account"], [datacy="popover-account"]');
   const containers = document.querySelectorAll("div.flex.flex-col.w-full.text-sm");
+  const creditButton = document.querySelector('[data-cy="credits-info-button"], [datacy="credits-info-button"]');
+
+  if (creditButton) {
+    const container = creditButton.closest('div.px-\\[25px\\]');
+    container.remove()
+  }
+
+
+
+  console.log(account)
 
   for (const el of containers) {
     // Optional: refine further by checking child content
@@ -90,6 +104,10 @@ function trimAccountDropdown() {
     upgrade.remove();
     console.log("❌ Removed: Upgrade");
   }
+  if (upgradeBtn) {
+    upgradeBtn.remove();
+    console.log("❌ Removed: Upgrade");
+  }
 
   if (subscription) {
     subscription.remove();
@@ -100,33 +118,50 @@ function trimAccountDropdown() {
     account.remove();
     console.log("❌ Removed: Account");
   }
+
+
+  if (language) {
+    language.remove();
+    console.log("❌ Removed: language");
+  }
+
+
+
 }
 
 
 function setupAccountDropdownWatcher() {
-  console.log("form funciton ")
-  const accountBtn = document.querySelector('button[aria-controls="radix-:r1:"]')
+  const accountBtn1 = document.querySelector('button[aria-controls="radix-:r1:"]');
+  const accountBtn2List = document.querySelectorAll("div.relative.z-20.flex.size-8.shrink-0.flex-col button");
 
-  if (!accountBtn) {
-    console.log("account button not foun")
+  const accountBtns = [];
+
+  if (accountBtn1) accountBtns.push(accountBtn1);
+  if (accountBtn2List.length > 0) accountBtns.push(...accountBtn2List);
+
+  if (accountBtns.length === 0) {
     return setTimeout(setupAccountDropdownWatcher, 500);
   }
 
-  accountBtn.addEventListener("click", () => {
-    console.log("👤 Account button clicked");
+  accountBtns.forEach(btn => {
+    if (!btn || btn.dataset.listenerAdded) return;
 
-    // Observe and filter dropdown
-    const observer = new MutationObserver(() => {
-      trimAccountDropdown();
+    btn.addEventListener("click", () => {
+      console.log("👤 Account button clicked");
+
+      const observer = new MutationObserver(() => {
+        trimAccountDropdown();
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      setTimeout(trimAccountDropdown, 300);
     });
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    // Fallback if dropdown appears instantly
-    setTimeout(trimAccountDropdown, 300);
+    btn.dataset.listenerAdded = "true";
   });
 }
 
